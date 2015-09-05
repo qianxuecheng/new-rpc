@@ -7,15 +7,15 @@ import io.netty.channel.ChannelHandlerContext;
 /**
  * Created by qianxuecheng on 15/9/5.
  */
-public class NettyByrteBufferWrapper implements ByteBufferWrapper{
+public class NettyByteBufferWrapper implements ByteBufferWrapper{
     private ByteBuf buffer;
     private ChannelHandlerContext ctx;
 
-    public NettyByrteBufferWrapper(ByteBuf buffer) {
+    public NettyByteBufferWrapper(ByteBuf buffer) {
         this.buffer = buffer;
     }
 
-    public NettyByrteBufferWrapper(ChannelHandlerContext ctx) {
+    public NettyByteBufferWrapper(ChannelHandlerContext ctx) {
         this.ctx = ctx;
     }
 
@@ -29,6 +29,11 @@ public class NettyByrteBufferWrapper implements ByteBufferWrapper{
     }
 
     @Override
+    public void writeByte(int index) {
+
+    }
+
+
     public void writeByte(int index, byte data) {
         buffer.writeByte(data);
 

@@ -41,7 +41,7 @@ public class NettyClientFactory extends AbstractClientFactory {
                     protected void initChannel(SocketChannel ch) throws Exception {
                         ChannelPipeline pipeline = ch.pipeline();
                         pipeline.addLast("decoder",new NettyProtocolDecoder());
-                      //  pipeline.addLast("encoder",new NettyDecoderEncoder());
+                        pipeline.addLast("encoder",new NettyProtocolEncoder());
                         pipeline.addLast(handler);
 
 
@@ -55,7 +55,7 @@ public class NettyClientFactory extends AbstractClientFactory {
     }
 
     @Override
-    public Client getClient(String targetIP, int targetPort) {
-        return null;
+    public Client getClient(String targetIP, int targetPort) throws Exception {
+        return createClient(targetIP,targetPort,1000,"");
     }
 }

@@ -1,6 +1,7 @@
 package com.github.rpc.client;
 
-import com.github.rpc.ResponseWrapper;
+import com.github.rpc.protocol.Request;
+import com.github.rpc.protocol.Response;
 
 import java.util.List;
 
@@ -10,19 +11,17 @@ import java.util.List;
 public interface Client {
 
     @SuppressWarnings("unused")
-    public Object invokeSync(String targetInstanceName,String methodName,
-                             String[] parameterTypeStrs,Object[] args,
-                             int codecType,int protocolType)throws Exception;
+    public Object invokeSync(Request request)throws Exception;
 
 
     /**
      * receive response from server
      */
-    public void putResponse(ResponseWrapper response) throws Exception;
+    public void putResponse(Response response) throws Exception;
 
     /**
      * receive responses from server
      */
-    public void putResponses(List<ResponseWrapper> responses) throws Exception;
+    public void putResponses(List<Response> responses) throws Exception;
 
 }

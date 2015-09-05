@@ -46,7 +46,7 @@ public abstract class AbstractProtocol implements Protocol{//SQLObject 有点AST
             if(byteBuf.readByte()!=getProtocolVersion()){
                 throw new Exception("Unsupported Protocol Version!");
             }
-            if (byteBuf.readableBytes()<byteBuf.readableBytes()-PROTOCOL_VERSION_LENGTH-TOTAL_LENGTH){
+            if (byteBuf.readableBytes()<byteBuf.readInt()-PROTOCOL_VERSION_LENGTH-TOTAL_LENGTH){
                 throw new Exception("Application data is not full");
             }
             int type=byteBuf.readByte();

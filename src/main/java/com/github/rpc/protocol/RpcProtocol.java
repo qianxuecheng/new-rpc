@@ -18,6 +18,14 @@ public class RpcProtocol extends AbstractProtocol {
     private static final byte MINOR=1;//low 4 bit
     private static final byte protocolVersion=MAJOR<<4+MINOR;
 
+    private static final RpcProtocol instance=new RpcProtocol();
+    public static RpcProtocol getInstance(){
+        return instance;
+    }
+
+    private RpcProtocol() {
+    }
+
     private static final int CODEC_TYPE_LENGTH=1;
     private static final int PROTOCOL_TYPE_LENGTH=1;
     private static final byte[] NO_BYTE=new byte[0];

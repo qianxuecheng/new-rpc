@@ -18,6 +18,14 @@ public class Response {
         this.protocolType = protocolType;
     }
 
+    public Object reCreate() throws Exception{
+        if(reply!=null){
+            return reply;
+        }
+        throw new Exception(exception);
+
+    }
+
     public int getSessionId() {
         return sessionId;
     }

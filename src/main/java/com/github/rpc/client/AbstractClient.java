@@ -3,10 +3,10 @@ package com.github.rpc.client;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 
-import com.github.rpc.RequestWrapper;
-import com.github.rpc.ResponseWrapper;
-import com.github.rpc.codec.CodecFactory;
+import com.github.rpc.protocol.Request;
+import com.github.rpc.protocol.Response;
 
 /**
  * Created by qianxuecheng on 15/9/3.
@@ -14,32 +14,32 @@ import com.github.rpc.codec.CodecFactory;
 public abstract class AbstractClient implements Client{
     public ConcurrentHashMap<Integer,ArrayBlockingQueue<Object>/**ResponseWrapper or List<ResponseWrapper>*/> responses=new ConcurrentHashMap<Integer, ArrayBlockingQueue<Object>>();
     @Override
-    public Object invokeSync(String targetInstanceName, String methodName, String[] parameterTypeStrs, Object[] args, int codecType, int protocolType) throws Exception{
-        byte[][] parameterTypesBytes=new byte[parameterTypeStrs.length][];
+    public Object invokeSync(Request request) throws Exception{
+    /*    byte[][] parameterTypesBytes=new byte[parameterTypeStrs.length][];
         for(int i=0;i<parameterTypeStrs.length;i++){
             parameterTypesBytes[i]=parameterTypeStrs[i].getBytes();
-        }
+        }*/
 
 
-        return invokeSyncIntern(new RequestWrapper(methodName.getBytes(),parameterTypesBytes,args,codecType,protocolType,targetInstanceName.getBytes()));
+        return invokeSyncIntern(request);
     }
 
-    private Object invokeSyncIntern(RequestWrapper requestWrapper) throws Exception {
-        ArrayBlockingQueue<Object> response=new ArrayBlockingQueue<Object>(1);
-        responses.put(requestWrapper.getId(),response);
-        ResponseWrapper respnseWrapper=null;
+    private Object invokeSyncIntern(Request request) throws Exception {
+        ArrayBlockingQueue<Object> responseQueue=new ArrayBlockingQueue<Object>(1);
+        responses.put(request.getSessionId(),responseQueue);
+        Response response=null;
         //TODO 流量控制
-        sendRequest(requestWrapper);
+        sendRequest(request);
 
-        Object result=response.poll();
-        if(result instanceof ResponseWrapper){
-            respnseWrapper= (ResponseWrapper) result;
+        Object result=responseQueue.poll(100, TimeUnit.SECONDS);
+        if(result instanceof Response){
+            response= (Response) result;
         }else if(result instanceof List){
             @SuppressWarnings("unchecked")
-            List<ResponseWrapper> responseWrappers= (List<ResponseWrapper>) result;
-            for (ResponseWrapper response2:responseWrappers){
-                if(response2.getRequestId()==requestWrapper.getId()){
-                    respnseWrapper=response2;
+            List<Response> responses = (List<Response>) result;
+            for (Response response2: responses){
+                if(response2.getSessionId()==request.getSessionId()){
+                    response=response2;
                 }
                 else {
                     putResponse(response2);
@@ -49,15 +49,16 @@ public abstract class AbstractClient implements Client{
 
 
         }
-        //do deserialize in business thread pool
 
-        if(respnseWrapper.getResponse() instanceof byte[]){
+        //do deserialize in business thread pool
+/*
+        if(re.getResponse() instanceof byte[]){
             String responseClassName=respnseWrapper.getResponseClassName()!=null?new String(respnseWrapper.getResponseClassName()):null;
             if(((byte[]) respnseWrapper.getResponse()).length==0){
                 respnseWrapper.setResponse(null);
             }
             else {
-                Object responseObject= CodecFactory.getDecoder(CodecFactory.CodecType.JDK).
+                Object responseObject= CodecFactory.getDecoder(CodecFactory.CodecType.Jdk).
                         decode(responseClassName, (byte[]) respnseWrapper.getResponse());
                 if(responseObject instanceof Throwable){
                     respnseWrapper.setException((Throwable) responseObject);
@@ -73,17 +74,17 @@ public abstract class AbstractClient implements Client{
             Throwable t=respnseWrapper.getException();
             throw  new Exception(t);
 
-        }
-        return respnseWrapper.getResponse();
+        }*/
+        return response.reCreate();
     }
 
     @Override
-    public void putResponse(ResponseWrapper response) throws Exception {
-        if(!responses.containsKey(response.getRequestId())){
+    public void putResponse(Response response) throws Exception {
+        if(!responses.containsKey(response.getSessionId())){
             return;
         }
 
-        ArrayBlockingQueue<Object> responseQueue=responses.get(response.getRequestId());
+        ArrayBlockingQueue<Object> responseQueue=responses.get(response.getSessionId());
         if(responseQueue!=null){
             responseQueue.put(response);
         }
@@ -91,13 +92,13 @@ public abstract class AbstractClient implements Client{
     }
 
     @Override
-    public void putResponses(List<ResponseWrapper> responses) throws Exception {
-        for(ResponseWrapper responseWrapper:responses){
-            putResponse(responseWrapper);
+    public void putResponses(List<Response> responses) throws Exception {
+        for(com.github.rpc.protocol.Response response:responses){
+            putResponse(response);
         }
 
     }
 
-    public abstract void sendRequest(RequestWrapper wrapper) throws Exception;
+    public abstract void sendRequest(Request wrapper) throws Exception;
 
 }

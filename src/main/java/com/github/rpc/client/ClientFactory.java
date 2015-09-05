@@ -5,6 +5,6 @@ package com.github.rpc.client;
  *  API   Singleton ThreadSafe
  */
 public interface ClientFactory {
-    public Client getClient(String targetIP,int targetPort);
+    public Client getClient(String targetIP,int targetPort) throws Exception;
 
 }
