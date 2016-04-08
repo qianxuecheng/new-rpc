@@ -25,5 +25,8 @@
         <module name="new-rpc" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="new-rpc" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
 </project>

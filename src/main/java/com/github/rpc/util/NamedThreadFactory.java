@@ -11,21 +11,21 @@ public class NamedThreadFactory implements ThreadFactory {
     private final  AtomicInteger threadNumber=new AtomicInteger(1);
     private String namePrefix;
     private final ThreadGroup group;
-    private boolean isDeamon;
+    private boolean isDaemon;
     public NamedThreadFactory(String prefix){
         this(prefix,false);
     }
     public NamedThreadFactory(String prefix,boolean daemon) {
         SecurityManager s;
         group=((s=System.getSecurityManager())!=null?s.getThreadGroup():Thread.currentThread().getThreadGroup());
-        isDeamon=daemon;
+        isDaemon =daemon;
         this.namePrefix= prefix+"-"+threadFactoryNumber.incrementAndGet()+"-thread-" ;
     }
 
     @Override
     public Thread newThread(Runnable r) {
         Thread t=new Thread(group,r,namePrefix+threadNumber.incrementAndGet(),0);
-        t.setDaemon(isDeamon);
+        t.setDaemon(isDaemon);
         return t;
     }
 }
